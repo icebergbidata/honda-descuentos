@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Honda — Descuentos Retail</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0f0f0;min-height:100vh;color:#1c1c1e;padding-bottom:80px}
+
+.header{background:#16181c;padding:16px 20px;position:sticky;top:0;z-index:10}
+.header-inner{max-width:480px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.logo-badge{background:#CC0000;border-radius:10px;padding:8px 12px;flex-shrink:0}
+.logo-badge span{font-family:Impact,"Arial Black",sans-serif;font-size:22px;font-weight:900;color:#fff;letter-spacing:1px;line-height:1;display:block}
+.header-title{color:#fff;font-size:17px;font-weight:700}
+.header-sub{color:rgba(255,255,255,.45);font-size:12px;margin-top:2px}
+.user-chip{margin-left:auto;background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;cursor:pointer;display:none}
+.user-chip:hover{background:rgba(255,255,255,.2)}
+
+/* Nav inferior */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e5ea;display:none;z-index:10}
+.bottom-nav.show{display:flex}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;cursor:pointer;color:#8e8e93;font-size:11px;font-weight:600;gap:3px;transition:color .15s}
+.nav-item.active{color:#CC0000}
+.nav-icon{font-size:22px;line-height:1}
+.nav-badge{background:#CC0000;color:#fff;font-size:10px;font-weight:700;padding:1px 5px;border-radius:10px;min-width:16px;text-align:center;display:none}
+.nav-badge.show{display:inline-block}
+
+.body{max-width:480px;margin:0 auto;padding:16px}
+
+/* Loading */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px}
+.loading .sp{width:36px;height:36px;border:3px solid #e5e5ea;border-top-color:#CC0000;border-radius:50%;animation:spin .7s linear infinite}
+.loading p{font-size:14px;color:#8e8e93}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Login */
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 70px);padding:20px}
+.login-card{background:#fff;border-radius:24px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.login-logo{display:flex;justify-content:center;margin-bottom:24px}
+.login-logo .badge{background:#CC0000;border-radius:14px;padding:12px 18px}
+.login-logo .badge span{font-family:Impact,"Arial Black",sans-serif;font-size:28px;font-weight:900;color:#fff;letter-spacing:1px}
+.login-title{font-size:22px;font-weight:800;text-align:center;margin-bottom:6px}
+.login-sub{font-size:14px;color:#8e8e93;text-align:center;margin-bottom:28px}
+.login-field{margin-bottom:14px}
+.login-field label{display:block;font-size:13px;color:#6e6e73;font-weight:500;margin-bottom:5px}
+.login-field input{width:100%;padding:13px 16px;font-size:15px;border:1.5px solid #e5e5ea;border-radius:12px;font-family:inherit;outline:none;background:#fafafa;transition:border-color .15s}
+.login-field input:focus{border-color:#CC0000;background:#fff;box-shadow:0 0 0 3px rgba(204,0,0,.08)}
+.login-btn{width:100%;padding:15px;background:linear-gradient(135deg,#CC0000,#990000);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(204,0,0,.3)}
+.login-btn:disabled{background:#c7c7cc;box-shadow:none;cursor:not-allowed}
+.login-error{background:#fef2f2;border:1.5px solid #fca5a5;color:#b91c1c;border-radius:10px;padding:10px 14px;font-size:13px;margin-top:12px;display:none}
+.login-error.show{display:block}
+
+/* Cards */
+.card{background:#fff;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);border-left:4px solid #CC0000}
+.stitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#8e8e93;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+
+/* Asesor info */
+.asesor-info{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fafafa;border-radius:12px;border:1.5px solid #e5e5ea}
+.asesor-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#CC0000,#990000);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0}
+.asesor-nombre{font-size:15px;font-weight:700}
+.asesor-suc{font-size:12px;color:#8e8e93;margin-top:2px}
+.asesor-usuario{font-size:11px;font-weight:600;color:#CC0000;background:#fff5f5;padding:2px 8px;border-radius:6px;display:inline-block;margin-top:4px}
+
+/* Fields */
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:13px;color:#6e6e73;margin-bottom:5px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;font-size:15px;border:1.5px solid #e5e5ea;border-radius:12px;background:#fafafa;color:#1c1c1e;outline:none;font-family:inherit;transition:border-color .15s;appearance:none;-webkit-appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#CC0000;background:#fff;box-shadow:0 0 0 3px rgba(204,0,0,.08)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* Producto */
+.prod-selector{border:1.5px solid #e5e5ea;border-radius:12px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;background:#fafafa;transition:all .15s}
+.prod-selector:hover{border-color:#CC0000;background:#fff5f5}
+.prod-selector.selected{border-color:#CC0000;background:#fff}
+.prod-thumb{width:52px;height:52px;border-radius:10px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;border:1px solid #eee}
+.prod-info{flex:1;min-width:0}
+.prod-nombre{font-size:14px;font-weight:600;color:#8e8e93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-nombre.sel{color:#1c1c1e}
+.prod-sku{font-size:11px;color:#8e8e93;margin-top:2px}
+.prod-precio-base{font-size:14px;font-weight:700;color:#CC0000;white-space:nowrap;flex-shrink:0}
+
+/* Preview */
+.apr-preview{border-radius:12px;padding:14px 16px;display:none;margin-top:12px}
+.apr-preview.show{display:block}
+.apr-preview.ok{background:#f0fdf4;border:1.5px solid #86efac}
+.apr-preview.warn{background:#fff7ed;border:1.5px solid #fed7aa}
+.apr-preview.high{background:#fef2f2;border:1.5px solid #fca5a5}
+.apr-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#8e8e93;margin-bottom:5px}
+.apr-nombre{font-size:15px;font-weight:700}
+.apr-detalle{font-size:13px;color:#8e8e93;margin-top:3px}
+.apr-detalle strong{color:#CC0000;font-size:14px}
+
+/* Total */
+.total-card{background:linear-gradient(135deg,#CC0000,#990000);border-radius:16px;padding:18px 20px;margin-bottom:14px;box-shadow:0 4px 16px rgba(204,0,0,.3)}
+.total-top{display:flex;justify-content:space-between;align-items:flex-start}
+.total-lbl{color:rgba(255,255,255,.8);font-size:13px;font-weight:500;margin-bottom:4px}
+.total-amt{color:#fff;font-size:32px;font-weight:800;letter-spacing:-.5px}
+.total-meta{color:rgba(255,255,255,.6);font-size:12px;margin-top:6px}
+.total-aprobador{color:rgba(255,255,255,.85);font-size:12px;font-weight:600;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px;display:inline-block;margin-top:8px}
+
+/* Submit */
+.submit-btn{width:100%;padding:17px;background:linear-gradient(135deg,#CC0000,#990000);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;margin-bottom:20px;box-shadow:0 4px 14px rgba(204,0,0,.35)}
+.submit-btn:hover:not(:disabled){transform:translateY(-1px)}
+.submit-btn:disabled{background:#c7c7cc;cursor:not-allowed;box-shadow:none;transform:none}
+.spinner{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+
+/* Alert */
+.alert{border-radius:12px;padding:14px 16px;font-size:14px;display:none;align-items:flex-start;gap:10px;margin-bottom:14px}
+.alert.error{background:#fef2f2;border:1.5px solid #fca5a5;color:#b91c1c}
+.alert.show{display:flex}
+
+/* Bottom sheet producto */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
+.overlay.show{display:flex}
+.sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.sheet-hdr{padding:16px 20px 12px;border-bottom:1px solid #f0f0f0;flex-shrink:0}
+.sheet-hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sheet-hdr h3{font-size:16px;font-weight:700}
+.close-btn{background:none;border:none;font-size:22px;cursor:pointer;color:#8e8e93}
+.search-input{width:100%;padding:10px 14px 10px 36px;border:1.5px solid #e5e5ea;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fafafa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center}
+.search-input:focus{border-color:#CC0000}
+.prod-list{overflow-y:auto;flex:1;padding:8px 0}
+.popt{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer}
+.popt:active,.popt.selected{background:#fff5f5}
+.popt-thumb{width:48px;height:48px;border-radius:10px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:22px;border:1px solid #eee;flex-shrink:0;overflow:hidden;padding:0}
+.popt-info{flex:1;min-width:0}
+.popt-name{font-size:14px;font-weight:600;color:#1c1c1e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.popt-sku{font-size:11px;color:#8e8e93;margin-top:2px}
+.popt-price{font-size:15px;font-weight:700;color:#CC0000;flex-shrink:0}
+.no-results{padding:30px 20px;text-align:center;color:#8e8e93;font-size:14px}
+
+/* Success */
+.success-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.success-overlay.show{display:flex}
+.success-card{background:#fff;border-radius:24px;padding:36px 28px;text-align:center;max-width:320px;width:90%;animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.success-icon{width:70px;height:70px;background:linear-gradient(135deg,#CC0000,#990000);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px}
+.success-title{font-size:20px;font-weight:700;margin-bottom:8px}
+.success-np{font-size:13px;font-weight:700;color:#CC0000;background:#fff5f5;padding:6px 14px;border-radius:20px;display:inline-block;margin-bottom:14px}
+.success-sub{font-size:13px;color:#8e8e93;margin-bottom:20px;line-height:1.6;white-space:pre-line}
+.success-btn{width:100%;padding:13px;background:linear-gradient(135deg,#CC0000,#990000);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}
+
+/* Mis solicitudes */
+.mis-sol-card{background:#fff;border-radius:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden}
+.mis-sol-header{padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;border-left:4px solid #e5e5ea}
+.mis-sol-header.pendiente{border-left-color:#f59e0b}
+.mis-sol-header.aprobado{border-left-color:#16a34a}
+.mis-sol-header.rechazado{border-left-color:#CC0000}
+.mis-sol-id{font-size:12px;font-weight:700;color:#CC0000;background:#fff5f5;padding:3px 8px;border-radius:6px;flex-shrink:0}
+.mis-sol-info{flex:1;min-width:0}
+.mis-sol-cliente{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mis-sol-meta{font-size:12px;color:#8e8e93;margin-top:2px}
+.mis-sol-pct{font-size:18px;font-weight:800;flex-shrink:0}
+.mis-sol-pct.ok{color:#16a34a}
+.mis-sol-pct.warn{color:#f59e0b}
+.mis-sol-pct.high{color:#CC0000}
+.estado-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;flex-shrink:0}
+.estado-badge.pendiente{background:#fef3c7;color:#92400e}
+.estado-badge.aprobado{background:#dcfce7;color:#166534}
+.estado-badge.rechazado{background:#fee2e2;color:#991b1b}
+.chevron{color:#8e8e93;font-size:14px;flex-shrink:0;transition:transform .2s}
+.chevron.open{transform:rotate(180deg)}
+.mis-sol-detalle{display:none;padding:0 16px 16px;border-top:1px solid #f5f5f5}
+.mis-sol-detalle.open{display:block}
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.det-lbl{font-size:11px;color:#8e8e93;font-weight:500;margin-bottom:2px}
+.det-val{font-size:14px;font-weight:600}
+.det-val.precio{color:#CC0000;font-size:16px}
+.coment-box{padding:10px 12px;border-radius:6px;font-size:13px;margin-top:8px}
+.coment-box.aprobado{background:#f0fdf4;border-left:3px solid #16a34a}
+.coment-box.rechazado{background:#fef2f2;border-left:3px solid #CC0000}
+.coment-box.pendiente{background:#fffbf0;border-left:3px solid #f59e0b}
+
+.empty{text-align:center;padding:60px 20px}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.empty-title{font-size:18px;font-weight:700;margin-bottom:6px}
+.empty-sub{font-size:14px;color:#8e8e93}
+
+.filtros{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.filtro-btn{padding:7px 16px;border-radius:20px;border:1.5px solid #e5e5ea;background:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;color:#8e8e93}
+.filtro-btn.active{background:#CC0000;border-color:#CC0000;color:#fff}
+
+.refresh-btn{display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #e5e5ea;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;color:#8e8e93;cursor:pointer;margin-bottom:14px}
+.refresh-btn:hover{border-color:#CC0000;color:#CC0000}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-badge"><span>HONDA</span></div>
+    <div>
+      <div class="header-title">Descuentos Retail</div>
+      <div class="header-sub" id="header-sub">Solicitud de autorización</div>
+    </div>
+    <div class="user-chip" id="user-chip" onclick="cerrarSesion()" title="Cerrar sesión"></div>
+  </div>
+</div>
+
+<div class="body" id="main-body">
+  <div class="loading"><div class="sp"></div><p>Cargando...</p></div>
+</div>
+
+<!-- Nav inferior -->
+<nav class="bottom-nav" id="bottom-nav">
+  <div class="nav-item active" id="nav-nueva" onclick="cambiarTab('nueva')">
+    <span class="nav-icon">➕</span>
+    <span>Nueva</span>
+  </div>
+  <div class="nav-item" id="nav-mis" onclick="cambiarTab('mis')">
+    <span class="nav-icon">📋</span>
+    <span>Mis solicitudes</span>
+    <span class="nav-badge" id="badge-pend"></span>
+  </div>
+</nav>
+
+<!-- Bottom sheet producto -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet">
+    <div class="sheet-hdr">
+      <div class="sheet-hdr-top">
+        <h3>Seleccionar producto</h3>
+        <button class="close-btn" onclick="closeSheet()">✕</button>
+      </div>
+      <input class="search-input" id="search-input" type="text"
+             placeholder="Buscar por nombre o SKU..." oninput="filtrarProductos()">
+    </div>
+    <div class="prod-list" id="prod-list-sheet"></div>
+  </div>
+</div>
+
+<!-- Success -->
+<div class="success-overlay" id="success-overlay">
+  <div class="success-card">
+    <div class="success-icon">✓</div>
+    <div class="success-title">¡Solicitud enviada!</div>
+    <div class="success-np" id="success-np"></div>
+    <div class="success-sub" id="success-sub"></div>
+    <button class="success-btn" onclick="nuevaSolicitud()">Nueva solicitud</button>
+  </div>
+</div>
+
+<script>
+const BACKEND_URL = "https://script.google.com/macros/s/AKfycbymdVd-ycF9ZdlpmA3-uEgJCAtKGjSU2yrb798bb17xCS7l4lsySNIUq6OdMSet5HcS/exec";
+
+let SESSION      = null;
+let CONFIG       = { niveles:[], productos:[] };
+let PRODUCTO_SEL = null;
+let TAB_ACTIVA   = 'nueva';
+let MIS_SOLS     = [];
+let FILTRO_MIS   = 'Todos';
+
+// ── ARRANQUE ─────────────────────────────────────────────
+async function init() {
+  const saved = sessionStorage.getItem('honda_session');
+  if (saved) { try { SESSION = JSON.parse(saved); } catch(e) { SESSION = null; } }
+  if (SESSION) { await cargarConfig(); } else { mostrarLogin(); }
+}
+
+// ── LOGIN ────────────────────────────────────────────────
+function mostrarLogin() {
+  document.getElementById('user-chip').style.display = 'none';
+  document.getElementById('bottom-nav').classList.remove('show');
+  document.getElementById('main-body').innerHTML = `
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="login-logo"><div class="badge"><span>HONDA</span></div></div>
+        <div class="login-title">Bienvenido</div>
+        <div class="login-sub">Ingresa tus credenciales para continuar</div>
+        <div class="login-field">
+          <label>Usuario</label>
+          <input type="text" id="inp-usuario" placeholder="tu.usuario"
+                 onkeydown="if(event.key==='Enter')document.getElementById('inp-pass').focus()"/>
+        </div>
+        <div class="login-field">
+          <label>Contraseña</label>
+          <input type="password" id="inp-pass" placeholder="••••••••"
+                 onkeydown="if(event.key==='Enter')hacerLogin()"/>
+        </div>
+        <button class="login-btn" id="login-btn" onclick="hacerLogin()">
+          <span id="login-btn-label">Ingresar →</span>
+        </button>
+        <div class="login-error" id="login-error"></div>
+      </div>
+    </div>`;
+  setTimeout(() => document.getElementById('inp-usuario')?.focus(), 100);
+}
+
+async function hacerLogin() {
+  const usuario  = document.getElementById('inp-usuario').value.trim();
+  const password = document.getElementById('inp-pass').value.trim();
+  const errEl    = document.getElementById('login-error');
+  const btn      = document.getElementById('login-btn');
+  const lbl      = document.getElementById('login-btn-label');
+
+  errEl.classList.remove('show');
+  if (!usuario || !password) { errEl.textContent = 'Ingresa usuario y contraseña.'; errEl.classList.add('show'); return; }
+
+  btn.disabled = true;
+  lbl.innerHTML = '<div class="spinner"></div>';
+
+  try {
+    const res  = await fetch(BACKEND_URL, { method:'POST', body: JSON.stringify({ action:'login', usuario, password }), headers:{'Content-Type':'text/plain'} });
+    const data = await res.json();
+
+    if (data.ok) {
+      SESSION = { usuario: data.usuario, asesor: data.asesor, sucursal: data.sucursal };
+      sessionStorage.setItem('honda_session', JSON.stringify(SESSION));
+      await cargarConfig();
+    } else {
+      errEl.textContent = data.error || 'Credenciales incorrectas.';
+      errEl.classList.add('show');
+      btn.disabled = false; lbl.textContent = 'Ingresar →';
+    }
+  } catch(e) {
+    errEl.textContent = 'Error de conexión: ' + e.message;
+    errEl.classList.add('show');
+    btn.disabled = false; lbl.textContent = 'Ingresar →';
+  }
+}
+
+function cerrarSesion() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  sessionStorage.removeItem('honda_session');
+  SESSION = null; PRODUCTO_SEL = null;
+  mostrarLogin();
+}
+
+// ── CONFIG ───────────────────────────────────────────────
+async function cargarConfig() {
+  try {
+    const res  = await fetch(BACKEND_URL + '?action=getConfig');
+    const data = await res.json();
+    if (data.ok) CONFIG = data;
+  } catch(e) {}
+
+  const chip = document.getElementById('user-chip');
+  chip.textContent = SESSION.usuario + ' · Salir';
+  chip.style.display = 'block';
+  document.getElementById('bottom-nav').classList.add('show');
+
+  renderNuevaSolicitud();
+}
+
+// ── TABS ─────────────────────────────────────────────────
+async function cambiarTab(tab) {
+  TAB_ACTIVA = tab;
+  document.getElementById('nav-nueva').classList.toggle('active', tab === 'nueva');
+  document.getElementById('nav-mis').classList.toggle('active',   tab === 'mis');
+
+  if (tab === 'nueva') {
+    document.getElementById('header-sub').textContent = 'Solicitud de autorización';
+    renderNuevaSolicitud();
+  } else {
+    document.getElementById('header-sub').textContent = 'Mis solicitudes';
+    await cargarMisSolicitudes();
+  }
+}
+
+// ── NUEVA SOLICITUD ──────────────────────────────────────
+function renderNuevaSolicitud() {
+  const a   = SESSION.asesor;
+  const s   = SESSION.sucursal;
+  const ini = a ? a.nombre.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() : '?';
+
+  document.getElementById('main-body').innerHTML = `
+    <div class="card">
+      <div class="stitle">👤 Asesor</div>
+      <div class="asesor-info">
+        <div class="asesor-avatar">${ini}</div>
+        <div>
+          <div class="asesor-nombre">${a ? a.nombre : '—'}</div>
+          <div class="asesor-suc">📍 ${s ? s.nombre + ' · ' + s.ciudad : '—'}</div>
+          <div class="asesor-usuario">@${SESSION.usuario}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="stitle">🏪 Cliente Retail</div>
+      <div class="field">
+        <label>Nombre del cliente *</label>
+        <input type="text" id="cliente" placeholder="Nombre o empresa"/>
+      </div>
+      <div class="row2">
+        <div class="field" style="margin:0"><label>RUC</label><input type="text" id="ruc" placeholder="0000000000001" maxlength="13"/></div>
+        <div class="field" style="margin:0"><label>Plazo</label><input type="text" id="plazo" placeholder="Contado, 30 días..."/></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="stitle">🏍️ Producto</div>
+      <div class="field" style="margin:0">
+        <label>Selecciona el producto *</label>
+        <div class="prod-selector" id="prod-selector" onclick="openSelector()">
+          <div class="prod-thumb" id="prod-thumb">＋</div>
+          <div class="prod-info">
+            <div class="prod-nombre" id="prod-nombre">Toca para seleccionar</div>
+            <div class="prod-sku" id="prod-sku"></div>
+          </div>
+          <div class="prod-precio-base" id="prod-precio-base"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="stitle">💰 Descuento solicitado</div>
+      <div class="field" style="margin:0">
+        <label>Porcentaje de descuento *</label>
+        <input type="number" id="descuento" min="0.1" max="99" step="0.1"
+               placeholder="Ej: 3.5" oninput="calcPreview()"/>
+      </div>
+      <div class="apr-preview" id="apr-preview">
+        <div class="apr-label">Requiere aprobación de</div>
+        <div class="apr-nombre" id="apr-nombre"></div>
+        <div class="apr-detalle" id="apr-detalle"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="stitle">🔢 N° Oportunidad ERP</div>
+      <div class="field" style="margin:0">
+        <input type="text" id="nro_oportunidad" placeholder="Ej: OPP-2026-001 (opcional)"/>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="stitle">📝 Observaciones</div>
+      <div class="field" style="margin:0">
+        <textarea id="obs" rows="2" placeholder="Motivo del descuento..."></textarea>
+      </div>
+    </div>
+
+    <div class="total-card">
+      <div class="total-top">
+        <div>
+          <div class="total-lbl">Precio final con descuento</div>
+          <div class="total-amt" id="total-display">$ —</div>
+        </div>
+        <div style="text-align:right">
+          <div class="total-lbl">Descuento</div>
+          <div style="color:#fff;font-size:16px;font-weight:700" id="total-pct">—</div>
+        </div>
+      </div>
+      <div class="total-meta" id="total-meta">Selecciona producto e ingresa el descuento</div>
+      <div id="total-aprobador-wrap"></div>
+    </div>
+
+    <div class="alert error" id="alert-err">
+      <span style="font-size:20px">⚠️</span>
+      <span id="alert-err-text"></span>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="enviar()">
+      <span id="btn-label">Enviar solicitud →</span>
+    </button>`;
+}
+
+// ── MIS SOLICITUDES ──────────────────────────────────────
+async function cargarMisSolicitudes() {
+  document.getElementById('main-body').innerHTML =
+    '<div class="loading"><div class="sp"></div><p>Cargando tus solicitudes...</p></div>';
+
+  try {
+    const url  = BACKEND_URL + '?action=getSolicitudesAsesor&id_asesor=' + encodeURIComponent(SESSION.asesor.id_asesor);
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if (data.ok) {
+      MIS_SOLS = data.solicitudes || [];
+      // Actualiza badge de pendientes
+      const pend = MIS_SOLS.filter(s => s.estado === 'Pendiente').length;
+      const badge = document.getElementById('badge-pend');
+      if (pend > 0) { badge.textContent = pend; badge.classList.add('show'); }
+      else { badge.classList.remove('show'); }
+      renderMisSolicitudes();
+    } else {
+      document.getElementById('main-body').innerHTML =
+        `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Error</div><div class="empty-sub">${data.error}</div></div>`;
+    }
+  } catch(e) {
+    document.getElementById('main-body').innerHTML =
+      `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Error de conexión</div><div class="empty-sub">${e.message}</div></div>`;
+  }
+}
+
+function renderMisSolicitudes() {
+  const filtradas = MIS_SOLS.filter(s =>
+    FILTRO_MIS === 'Todos' || s.estado === FILTRO_MIS
+  );
+
+  const pend = MIS_SOLS.filter(s => s.estado === 'Pendiente').length;
+  const apro = MIS_SOLS.filter(s => s.estado === 'Aprobado').length;
+  const rech = MIS_SOLS.filter(s => s.estado === 'Rechazado').length;
+
+  let html = `
+    <button class="refresh-btn" onclick="cargarMisSolicitudes()">🔄 Actualizar</button>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+      <div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+        <div style="font-size:26px;font-weight:800;color:#f59e0b">${pend}</div>
+        <div style="font-size:11px;color:#8e8e93;font-weight:500">Pendientes</div>
+      </div>
+      <div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+        <div style="font-size:26px;font-weight:800;color:#16a34a">${apro}</div>
+        <div style="font-size:11px;color:#8e8e93;font-weight:500">Aprobadas</div>
+      </div>
+      <div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+        <div style="font-size:26px;font-weight:800;color:#CC0000">${rech}</div>
+        <div style="font-size:11px;color:#8e8e93;font-weight:500">Rechazadas</div>
+      </div>
+    </div>
+    <div class="filtros">
+      ${['Todos','Pendiente','Aprobado','Rechazado'].map(f =>
+        `<button class="filtro-btn ${FILTRO_MIS===f?'active':''}" onclick="setFiltroMis('${f}')">${f}</button>`
+      ).join('')}
+    </div>`;
+
+  if (!filtradas.length) {
+    html += `<div class="empty">
+      <div class="empty-icon">${FILTRO_MIS==='Pendiente'?'🎉':'📭'}</div>
+      <div class="empty-title">${FILTRO_MIS==='Pendiente'?'¡Sin pendientes!':'Sin solicitudes'}</div>
+      <div class="empty-sub">${FILTRO_MIS==='Pendiente'?'Todas tus solicitudes están procesadas.':'No hay solicitudes en esta categoría.'}</div>
+    </div>`;
+  } else {
+    html += filtradas.map(s => {
+      const est = s.estado.toLowerCase();
+      const pct = s.descuento_pct;
+      const cls = pct <= 2 ? 'ok' : pct <= 4 ? 'warn' : 'high';
+      return `
+        <div class="mis-sol-card">
+          <div class="mis-sol-header ${est}" onclick="toggleMisSol('${s.id_solicitud}')">
+            <div class="mis-sol-id">${s.id_solicitud}</div>
+            <div class="mis-sol-info">
+              <div class="mis-sol-cliente">${s.cliente}</div>
+              <div class="mis-sol-meta">${s.timestamp} · ${s.aprobador}</div>
+            </div>
+            <div class="mis-sol-pct ${cls}">${pct}%</div>
+            <div class="estado-badge ${est}">${s.estado}</div>
+            <div class="chevron" id="chev-${s.id_solicitud}">▾</div>
+          </div>
+          <div class="mis-sol-detalle" id="msdet-${s.id_solicitud}">
+            <div class="det-grid">
+              <div><div class="det-lbl">Cliente</div><div class="det-val">${s.cliente}</div></div>
+              <div><div class="det-lbl">RUC</div><div class="det-val">${s.ruc || '—'}</div></div>
+              <div><div class="det-lbl">Precio base</div><div class="det-val">$${s.precio_base.toFixed(2)}</div></div>
+              <div><div class="det-lbl">Descuento</div><div class="det-val" style="color:#CC0000">${pct}%</div></div>
+              <div><div class="det-lbl">Precio final</div><div class="det-val precio">$${s.precio_final.toFixed(2)}</div></div>
+              <div><div class="det-lbl">Plazo</div><div class="det-val">${s.plazo || '—'}</div></div>
+              <div><div class="det-lbl">Aprobador</div><div class="det-val">${s.aprobador}</div></div>
+              <div><div class="det-lbl">Estado</div><div class="det-val">${s.estado}</div></div>
+            </div>
+            ${s.nombre_producto ? `<div style="background:#f5f5f5;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:8px"><b>Producto:</b> ${s.nombre_producto}</div>` : ''}
+            ${s.nro_oportunidad ? `<div style="background:#f5f5f5;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:8px"><b>N° Oportunidad:</b> ${s.nro_oportunidad}</div>` : ''}
+            ${s.obs ? `<div class="coment-box pendiente"><b>Observaciones:</b> ${s.obs}</div>` : ''}
+            ${s.comentario ? `<div class="comet-box ${est}"><b>Comentario del aprobador:</b> ${s.comentario}</div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  document.getElementById('main-body').innerHTML = html;
+}
+
+function toggleMisSol(id) {
+  document.getElementById('msdet-' + id).classList.toggle('open');
+  document.getElementById('chev-' + id).classList.toggle('open');
+}
+
+function setFiltroMis(f) { FILTRO_MIS = f; renderMisSolicitudes(); }
+
+// ── SELECTOR PRODUCTO ────────────────────────────────────
+function openSelector() {
+  document.getElementById('search-input').value = '';
+  filtrarProductos();
+  document.getElementById('overlay').classList.add('show');
+  setTimeout(() => document.getElementById('search-input').focus(), 300);
+}
+function closeSheet() { document.getElementById('overlay').classList.remove('show'); }
+
+function filtrarProductos() {
+  const q    = document.getElementById('search-input').value.toLowerCase();
+  const list = document.getElementById('prod-list-sheet');
+  const fil  = CONFIG.productos.filter(p => !q || p.nombre.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+  if (!fil.length) { list.innerHTML = '<div class="no-results">Sin resultados</div>'; return; }
+  list.innerHTML = fil.map(p => `
+    <div class="popt ${PRODUCTO_SEL?.id_producto===p.id_producto?'selected':''}" onclick="selectProducto('${p.id_producto}')">
+      <div class="popt-thumb">${p.img ? `<img src="${p.img}" onerror="this.parentNode.innerHTML='🏍️'" style="width:100%;height:100%;object-fit:cover;border-radius:10px">` : '🏍️'}</div>
+      <div class="popt-info"><div class="popt-name">${p.nombre}</div><div class="popt-sku">${p.sku} · ${p.categoria}</div></div>
+      <div class="popt-price">$${p.precio_base.toFixed(2)}</div>
+    </div>`).join('');
+}
+
+function selectProducto(id) {
+  PRODUCTO_SEL = CONFIG.productos.find(p => p.id_producto === id);
+  if (!PRODUCTO_SEL) return;
+  document.getElementById('prod-selector').classList.add('selected');
+  const thumb = document.getElementById('prod-thumb');
+  if (PRODUCTO_SEL.img) {
+    thumb.style.padding = '0'; thumb.style.overflow = 'hidden';
+    thumb.innerHTML = `<img src="${PRODUCTO_SEL.img}" onerror="this.parentNode.innerHTML='🏍️'" style="width:100%;height:100%;object-fit:cover;border-radius:10px">`;
+  } else { thumb.textContent = '🏍️'; }
+  document.getElementById('prod-nombre').textContent = PRODUCTO_SEL.nombre;
+  document.getElementById('prod-nombre').classList.add('sel');
+  document.getElementById('prod-sku').textContent = PRODUCTO_SEL.sku + ' · ' + PRODUCTO_SEL.categoria;
+  document.getElementById('prod-precio-base').textContent = '$' + PRODUCTO_SEL.precio_base.toFixed(2);
+  closeSheet(); calcPreview();
+}
+
+// ── PREVIEW ──────────────────────────────────────────────
+function detectarAprobador(pct) {
+  const ord = CONFIG.niveles.slice().sort((a,b) => a.descuento_max - b.descuento_max);
+  return ord.find(n => pct <= n.descuento_max) || ord[ord.length-1];
+}
+
+function calcPreview() {
+  const pct   = parseFloat(document.getElementById('descuento')?.value) || 0;
+  const prev  = document.getElementById('apr-preview');
+  const total = document.getElementById('total-display');
+  const meta  = document.getElementById('total-meta');
+  const pctEl = document.getElementById('total-pct');
+  const aprW  = document.getElementById('total-aprobador-wrap');
+
+  if (!pct || !PRODUCTO_SEL) {
+    prev.className = 'apr-preview'; total.textContent = '$ —'; pctEl.textContent = '—';
+    meta.textContent = 'Selecciona producto e ingresa el descuento';
+    if (aprW) aprW.innerHTML = ''; return;
+  }
+
+  const aprobador   = detectarAprobador(pct);
+  const base        = PRODUCTO_SEL.precio_base;
+  const precioFinal = base * (1 - pct / 100);
+  const ahorro      = base - precioFinal;
+  const colorMap    = {'NIV-001':'ok','NIV-002':'ok','NIV-003':'warn','NIV-004':'warn','NIV-005':'high'};
+
+  prev.className = `apr-preview show ${colorMap[aprobador.id_nivel]||'warn'}`;
+  document.getElementById('apr-nombre').textContent = aprobador.etiqueta;
+  document.getElementById('apr-detalle').innerHTML  =
+    `Precio base $${base.toFixed(2)} &rarr; precio final <strong>$${precioFinal.toFixed(2)}</strong> · ahorro $${ahorro.toFixed(2)}`;
+  total.textContent = '$' + precioFinal.toFixed(2);
+  pctEl.textContent = pct + '%';
+  meta.textContent  = `Ahorro de $${ahorro.toFixed(2)} sobre precio base`;
+  if (aprW) aprW.innerHTML = `<div class="total-aprobador">Aprueba: ${aprobador.etiqueta}</div>`;
+}
+
+// ── ENVIAR ───────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('alert-err');
+  document.getElementById('alert-err-text').textContent = msg;
+  el.classList.add('show');
+  el.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+async function enviar() {
+  document.getElementById('alert-err').classList.remove('show');
+  const cliente   = document.getElementById('cliente').value.trim();
+  const ruc       = document.getElementById('ruc').value.trim();
+  const plazo     = document.getElementById('plazo').value.trim();
+  const descuento = parseFloat(document.getElementById('descuento').value) || 0;
+  const obs       = document.getElementById('obs').value.trim();
+
+  if (!cliente)              return showError('Ingresa el nombre del cliente.');
+  if (!PRODUCTO_SEL)         return showError('Selecciona un producto.');
+  if (!descuento || descuento <= 0) return showError('Ingresa un porcentaje válido.');
+  if (descuento > 99)        return showError('El porcentaje no puede superar 99%.');
+
+  const asesor      = SESSION.asesor;
+  const sucursal    = SESSION.sucursal;
+  const aprobador   = detectarAprobador(descuento);
+  const precioFinal = PRODUCTO_SEL.precio_base * (1 - descuento / 100);
+
+  const payload = {
+    usuario: SESSION.usuario,
+    id_asesor: asesor.id_asesor, id_sucursal: asesor.id_sucursal, id_producto: PRODUCTO_SEL.id_producto,
+    nombre_asesor: asesor.nombre, email_asesor: asesor.email,
+    nombre_sucursal: sucursal?.nombre || '', nombre_producto: PRODUCTO_SEL.nombre, sku_producto: PRODUCTO_SEL.sku,
+    cliente, ruc, plazo,
+    nro_oportunidad: String(document.getElementById('nro_oportunidad') ? document.getElementById('nro_oportunidad').value || '' : ''),
+    precio_base: PRODUCTO_SEL.precio_base, descuento_pct: descuento,
+    precio_final: parseFloat(precioFinal.toFixed(2)), obs
+  };
+
+  const btn = document.getElementById('submit-btn');
+  const lbl = document.getElementById('btn-label');
+  btn.disabled = true;
+  lbl.innerHTML = '<div class="spinner"></div> Enviando...';
+
+  try {
+    const res  = await fetch(BACKEND_URL, { method:'POST', body: JSON.stringify(payload), headers:{'Content-Type':'text/plain'} });
+    const data = await res.json();
+
+    if (data.ok) {
+      document.getElementById('success-np').textContent = data.id_solicitud;
+      document.getElementById('success-sub').textContent =
+        `${asesor.nombre} → ${cliente}\n${descuento}% · $${precioFinal.toFixed(2)}\nAprueba: ${aprobador.etiqueta}`;
+      document.getElementById('success-overlay').classList.add('show');
+      lbl.textContent = '✓ Solicitud enviada';
+    } else throw new Error(data.error || 'Error desconocido');
+  } catch(e) {
+    showError('Error: ' + e.message);
+    btn.disabled = false; lbl.textContent = 'Enviar solicitud →';
+  }
+}
+
+function nuevaSolicitud() {
+  document.getElementById('success-overlay').classList.remove('show');
+  PRODUCTO_SEL = null;
+  renderNuevaSolicitud();
+}
+
+init();
+</script>
+</body>
+</html>
