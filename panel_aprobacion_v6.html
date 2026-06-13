@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Honda — Panel de Aprobaciones</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0f0f0;min-height:100vh;color:#1c1c1e}
+.header{background:#16181c;padding:16px 20px;position:sticky;top:0;z-index:10}
+.header-inner{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.logo-badge{background:#CC0000;border-radius:10px;padding:8px 12px;flex-shrink:0}
+.logo-badge span{font-family:Impact,"Arial Black",sans-serif;font-size:22px;font-weight:900;color:#fff;letter-spacing:1px;line-height:1;display:block}
+.header-title{color:#fff;font-size:17px;font-weight:700}
+.header-sub{color:rgba(255,255,255,.45);font-size:12px;margin-top:2px}
+.user-chip{margin-left:auto;background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;cursor:pointer;display:none}
+.body{max-width:640px;margin:0 auto;padding:16px}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px}
+.loading .sp{width:36px;height:36px;border:3px solid #e5e5ea;border-top-color:#CC0000;border-radius:50%;animation:spin .7s linear infinite}
+.loading p{font-size:14px;color:#8e8e93}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 70px);padding:20px}
+.login-card{background:#fff;border-radius:24px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.login-logo{display:flex;justify-content:center;margin-bottom:24px}
+.login-logo .badge{background:#CC0000;border-radius:14px;padding:12px 18px}
+.login-logo .badge span{font-family:Impact,"Arial Black",sans-serif;font-size:28px;font-weight:900;color:#fff;letter-spacing:1px}
+.login-title{font-size:22px;font-weight:800;text-align:center;margin-bottom:6px}
+.login-sub{font-size:14px;color:#8e8e93;text-align:center;margin-bottom:28px}
+.login-field{margin-bottom:14px}
+.login-field label{display:block;font-size:13px;color:#6e6e73;font-weight:500;margin-bottom:5px}
+.login-field input{width:100%;padding:13px 16px;font-size:15px;border:1.5px solid #e5e5ea;border-radius:12px;font-family:inherit;outline:none;background:#fafafa;transition:border-color .15s}
+.login-field input:focus{border-color:#CC0000;background:#fff;box-shadow:0 0 0 3px rgba(204,0,0,.08)}
+.login-btn{width:100%;padding:15px;background:linear-gradient(135deg,#CC0000,#990000);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(204,0,0,.3)}
+.login-btn:disabled{background:#c7c7cc;box-shadow:none;cursor:not-allowed}
+.login-error{background:#fef2f2;border:1.5px solid #fca5a5;color:#b91c1c;border-radius:10px;padding:10px 14px;font-size:13px;margin-top:12px;display:none}
+.login-error.show{display:block}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.stat-num{font-size:28px;font-weight:800;letter-spacing:-.5px}
+.stat-lbl{font-size:11px;color:#8e8e93;margin-top:2px;font-weight:500}
+.stat-pend .stat-num{color:#f59e0b}
+.stat-apro .stat-num{color:#16a34a}
+.stat-rech .stat-num{color:#CC0000}
+.filtros{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.filtro-btn{padding:7px 16px;border-radius:20px;border:1.5px solid #e5e5ea;background:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;color:#8e8e93}
+.filtro-btn.active{background:#CC0000;border-color:#CC0000;color:#fff}
+.sol-card{background:#fff;border-radius:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden}
+.sol-header{padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;border-left:4px solid #e5e5ea}
+.sol-header.pendiente{border-left-color:#f59e0b}
+.sol-header.aprobado{border-left-color:#16a34a}
+.sol-header.rechazado{border-left-color:#CC0000}
+.sol-header.aplicado{border-left-color:#0369a1}
+.sol-id{font-size:12px;font-weight:700;color:#CC0000;background:#fff5f5;padding:3px 8px;border-radius:6px;flex-shrink:0}
+.sol-resumen{flex:1;min-width:0}
+.sol-cliente{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sol-meta{font-size:12px;color:#8e8e93;margin-top:2px}
+.sol-pct{font-size:18px;font-weight:800;flex-shrink:0}
+.sol-pct.ok{color:#16a34a}
+.sol-pct.warn{color:#f59e0b}
+.sol-pct.high{color:#CC0000}
+.estado-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;flex-shrink:0}
+.estado-badge.pendiente{background:#fef3c7;color:#92400e}
+.estado-badge.aprobado{background:#dcfce7;color:#166534}
+.estado-badge.rechazado{background:#fee2e2;color:#991b1b}
+.estado-badge.aplicado{background:#e0f2fe;color:#0369a1}
+.info-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:#e0f2fe;color:#0369a1;flex-shrink:0}
+.chevron{color:#8e8e93;font-size:14px;flex-shrink:0;transition:transform .2s}
+.chevron.open{transform:rotate(180deg)}
+.sol-detalle{display:none;padding:0 16px 16px;border-top:1px solid #f5f5f5}
+.sol-detalle.open{display:block}
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.det-lbl{font-size:11px;color:#8e8e93;font-weight:500;margin-bottom:2px}
+.det-val{font-size:14px;font-weight:600}
+.det-val.precio{color:#CC0000;font-size:16px}
+.info-box{padding:10px 12px;border-radius:6px;font-size:13px;margin-bottom:10px}
+.info-box.obs{background:#fffbf0;border-left:3px solid #f59e0b}
+.info-box.aprobado{background:#f0fdf4;border-left:3px solid #16a34a}
+.info-box.rechazado{background:#fef2f2;border-left:3px solid #CC0000}
+.info-box.info{background:#e0f2fe;border-left:3px solid #0369a1}
+.textarea-coment{width:100%;padding:12px 14px;font-size:14px;border:1.5px solid #e5e5ea;border-radius:12px;font-family:inherit;outline:none;resize:vertical;min-height:80px;margin-bottom:10px;transition:border-color .15s}
+.textarea-coment:focus{border-color:#CC0000;box-shadow:0 0 0 3px rgba(204,0,0,.08)}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-aprobar{padding:13px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-rechazar{padding:13px;background:#fff;color:#CC0000;border:1.5px solid #CC0000;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-aprobar:hover{opacity:.9}
+.btn-rechazar:hover{background:#fff5f5}
+.btn-aprobar:disabled,.btn-rechazar:disabled{opacity:.5;cursor:not-allowed}
+.refresh-btn{display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #e5e5ea;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;color:#8e8e93;cursor:pointer;margin-bottom:14px}
+.empty{text-align:center;padding:60px 20px}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.empty-title{font-size:18px;font-weight:700;margin-bottom:6px}
+.empty-sub{font-size:14px;color:#8e8e93}
+.error-card{background:#fef2f2;border:1.5px solid #fca5a5;border-radius:14px;padding:20px;text-align:center;margin:20px 0}
+.error-card p{color:#b91c1c;font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-badge"><span>HONDA</span></div>
+    <div>
+      <div class="header-title">Panel de Aprobaciones</div>
+      <div class="header-sub">Descuentos Retail</div>
+    </div>
+    <div class="user-chip" id="user-chip" onclick="cerrarSesion()"></div>
+  </div>
+</div>
+
+<div class="body" id="main-body">
+  <div class="loading"><div class="sp"></div><p>Cargando...</p></div>
+</div>
+
+<script>
+const BACKEND_URL = "https://script.google.com/macros/s/AKfycbymdVd-ycF9ZdlpmA3-uEgJCAtKGjSU2yrb798bb17xCS7l4lsySNIUq6OdMSet5HcS/exec";
+
+let SESSION       = null;
+let SOLICITUDES   = [];
+let FILTRO_ACTIVO = 'Todos';
+
+async function init() {
+  const saved = sessionStorage.getItem('honda_panel_session');
+  if (saved) { try { SESSION = JSON.parse(saved); } catch(e) { SESSION = null; } }
+  if (SESSION) { await cargarSolicitudes(); } else { mostrarLogin(); }
+}
+
+function mostrarLogin() {
+  document.getElementById('user-chip').style.display = 'none';
+  document.getElementById('main-body').innerHTML = `
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="login-logo"><div class="badge"><span>HONDA</span></div></div>
+        <div class="login-title">Panel de Aprobaciones</div>
+        <div class="login-sub">Ingresa tus credenciales de aprobador</div>
+        <div class="login-field">
+          <label>Usuario</label>
+          <input type="text" id="inp-usuario" placeholder="tu.usuario" onkeydown="if(event.key==='Enter')document.getElementById('inp-pass').focus()"/>
+        </div>
+        <div class="login-field">
+          <label>Contraseña</label>
+          <input type="password" id="inp-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')hacerLogin()"/>
+        </div>
+        <button class="login-btn" id="login-btn" onclick="hacerLogin()">
+          <span id="login-lbl">Ingresar →</span>
+        </button>
+        <div class="login-error" id="login-error"></div>
+      </div>
+    </div>`;
+  setTimeout(() => document.getElementById('inp-usuario')?.focus(), 100);
+}
+
+async function hacerLogin() {
+  const usuario  = document.getElementById('inp-usuario').value.trim();
+  const password = document.getElementById('inp-pass').value.trim();
+  const errEl    = document.getElementById('login-error');
+  const btn      = document.getElementById('login-btn');
+  const lbl      = document.getElementById('login-lbl');
+  errEl.classList.remove('show');
+  if (!usuario || !password) { errEl.textContent = 'Ingresa usuario y contraseña.'; errEl.classList.add('show'); return; }
+  btn.disabled = true; lbl.innerHTML = '<div class="spinner"></div>';
+  try {
+    const res  = await fetch(BACKEND_URL, { method:'POST', body: JSON.stringify({ action:'loginAprobador', usuario, password }), headers:{'Content-Type':'text/plain'} });
+    const data = await res.json();
+    if (data.ok) {
+      SESSION = { usuario: data.usuario, nombre: data.nombre, id_asesor: data.id_asesor, nivel: data.nivel };
+      sessionStorage.setItem('honda_panel_session', JSON.stringify(SESSION));
+      await cargarSolicitudes();
+    } else { errEl.textContent = data.error || 'Credenciales incorrectas.'; errEl.classList.add('show'); btn.disabled = false; lbl.textContent = 'Ingresar →'; }
+  } catch(e) { errEl.textContent = 'Error: ' + e.message; errEl.classList.add('show'); btn.disabled = false; lbl.textContent = 'Ingresar →'; }
+}
+
+function cerrarSesion() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  sessionStorage.removeItem('honda_panel_session');
+  SESSION = null; mostrarLogin();
+}
+
+async function cargarSolicitudes() {
+  document.getElementById('main-body').innerHTML = '<div class="loading"><div class="sp"></div><p>Cargando solicitudes...</p></div>';
+  try {
+    const url  = BACKEND_URL + '?action=getSolicitudes&id_asesor=' + encodeURIComponent(SESSION.id_asesor);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (!data.ok) { mostrarError(data.error); return; }
+    SOLICITUDES = data.solicitudes || [];
+    const chip = document.getElementById('user-chip');
+    chip.textContent = SESSION.usuario + ' · ' + SESSION.nivel.etiqueta + ' · Salir';
+    chip.style.display = 'block';
+    renderPanel();
+  } catch(e) { mostrarError(e.message); }
+}
+
+function renderPanel() {
+  const filtradas = SOLICITUDES.filter(s => FILTRO_ACTIVO === 'Todos' || s.estado === FILTRO_ACTIVO);
+  const pend = SOLICITUDES.filter(s => s.estado === 'Pendiente').length;
+  const apro = SOLICITUDES.filter(s => s.estado === 'Aprobado' || s.estado === 'Descuento aplicado').length;
+  const rech = SOLICITUDES.filter(s => s.estado === 'Rechazado').length;
+
+  let html = `
+    <button class="refresh-btn" onclick="cargarSolicitudes()">🔄 Actualizar</button>
+    <div class="stats-row">
+      <div class="stat-card stat-pend"><div class="stat-num">${pend}</div><div class="stat-lbl">Pendientes</div></div>
+      <div class="stat-card stat-apro"><div class="stat-num">${apro}</div><div class="stat-lbl">Aprobadas</div></div>
+      <div class="stat-card stat-rech"><div class="stat-num">${rech}</div><div class="stat-lbl">Rechazadas</div></div>
+    </div>
+    <div class="filtros">
+      ${['Todos','Pendiente','Aprobado','Rechazado','Descuento aplicado'].map(f =>
+        `<button class="filtro-btn ${FILTRO_ACTIVO===f?'active':''}" onclick="setFiltro('${f}')">${f}</button>`
+      ).join('')}
+    </div>`;
+
+  if (!filtradas.length) {
+    html += `<div class="empty"><div class="empty-icon">${FILTRO_ACTIVO==='Pendiente'?'🎉':'📭'}</div><div class="empty-title">${FILTRO_ACTIVO==='Pendiente'?'¡Sin pendientes!':'Sin solicitudes'}</div><div class="empty-sub">${FILTRO_ACTIVO==='Pendiente'?'Estás al día.':'No hay solicitudes en esta categoría.'}</div></div>`;
+  } else {
+    html += filtradas.map(s => {
+      const est = s.estado === 'Descuento aplicado' ? 'aplicado' : s.estado.toLowerCase();
+      const pct = s.descuento_pct;
+      const cls = pct <= 2 ? 'ok' : pct <= 4 ? 'warn' : 'high';
+      return `
+        <div class="sol-card">
+          <div class="sol-header ${est}" onclick="toggleDetalle('${s.id_solicitud}')">
+            <div class="sol-id">${s.id_solicitud}</div>
+            <div class="sol-resumen">
+              <div class="sol-cliente">${s.cliente}</div>
+              <div class="sol-meta">${s.nombre_asesor} (@${s.usuario||'—'}) · ${s.timestamp}</div>
+            </div>
+            <div class="sol-pct ${cls}">${pct}%</div>
+            ${s.es_intermedio ? '<div class="info-badge">INFO</div>' : ''}
+            <div class="estado-badge ${est}">${s.estado}</div>
+            <div class="chevron" id="chev-${s.id_solicitud}">▾</div>
+          </div>
+          <div class="sol-detalle" id="det-${s.id_solicitud}">
+            <div class="det-grid">
+              <div><div class="det-lbl">Fecha envío</div><div class="det-val">${s.timestamp}</div></div>
+              <div><div class="det-lbl">N° Solicitud</div><div class="det-val">${s.id_solicitud}</div></div>
+              <div><div class="det-lbl">Asesor</div><div class="det-val">${s.nombre_asesor}</div></div>
+              <div><div class="det-lbl">Usuario</div><div class="det-val">@${s.usuario||'—'}</div></div>
+              <div><div class="det-lbl">Sucursal</div><div class="det-val">${s.sucursal||'—'}</div></div>
+              <div><div class="det-lbl">Zonal</div><div class="det-val">${s.zonal||'—'}</div></div>
+              <div><div class="det-lbl">Cliente</div><div class="det-val">${s.cliente}</div></div>
+              <div><div class="det-lbl">RUC</div><div class="det-val">${s.ruc||'—'}</div></div>
+              <div><div class="det-lbl">Producto</div><div class="det-val">${s.nombre_producto||'—'}</div></div>
+              <div><div class="det-lbl">N° Oportunidad</div><div class="det-val">${s.nro_oportunidad||'—'}</div></div>
+              <div><div class="det-lbl">Precio base</div><div class="det-val">$${s.precio_base.toFixed(2)}</div></div>
+              <div><div class="det-lbl">Descuento</div><div class="det-val" style="color:#CC0000">${pct}%</div></div>
+              <div><div class="det-lbl">Precio final</div><div class="det-val precio">$${s.precio_final.toFixed(2)}</div></div>
+              <div><div class="det-lbl">Plazo</div><div class="det-val">${s.plazo||'—'}</div></div>
+              ${s.fecha_decision?`<div><div class="det-lbl">Fecha decisión</div><div class="det-val">${s.fecha_decision}</div></div><div><div class="det-lbl">Aprobado por</div><div class="det-val">${s.nombre_aprobador||'—'}</div></div>`:''}
+            </div>
+            ${s.obs?`<div class="info-box obs"><b>Observaciones:</b> ${s.obs}</div>`:''}
+            ${s.comentario&&s.estado!=='Pendiente'?`<div class="info-box ${est}"><b>Comentario:</b> ${s.comentario}</div>`:''}
+            ${s.es_intermedio?`<div class="info-box info"><b>ℹ️ Informativo:</b> Esta solicitud requiere aprobación de un nivel superior. Solo puedes verla.</div>`:''}
+            ${s.estado==='Pendiente'&&!s.es_intermedio?`
+              <div id="acc-${s.id_solicitud}">
+                <textarea class="textarea-coment" id="coment-${s.id_solicitud}" placeholder="Comentario (requerido si rechazas)..."></textarea>
+                <div class="btn-row">
+                  <button class="btn-aprobar" onclick="gestionar('${s.id_solicitud}','Aprobado')">✅ Aprobar</button>
+                  <button class="btn-rechazar" onclick="gestionar('${s.id_solicitud}','Rechazado')">❌ Rechazar</button>
+                </div>
+              </div>`:``}
+          </div>
+        </div>`;
+    }).join('');
+  }
+  document.getElementById('main-body').innerHTML = html;
+}
+
+function toggleDetalle(id) {
+  document.getElementById('det-'+id).classList.toggle('open');
+  document.getElementById('chev-'+id).classList.toggle('open');
+}
+
+function setFiltro(f) { FILTRO_ACTIVO = f; renderPanel(); }
+
+async function gestionar(idSolicitud, decision) {
+  const comentario = document.getElementById('coment-'+idSolicitud)?.value.trim() || '';
+  if (decision === 'Rechazado' && !comentario) {
+    alert('Por favor ingresa un comentario al rechazar.');
+    document.getElementById('coment-'+idSolicitud)?.focus();
+    return;
+  }
+  const acc = document.getElementById('acc-'+idSolicitud);
+  acc.innerHTML = '<div style="text-align:center;padding:12px;color:#8e8e93"><div class="spinner" style="border-top-color:#CC0000;border-color:#e5e5ea;margin-right:8px"></div>Procesando...</div>';
+  try {
+    const res  = await fetch(BACKEND_URL, {
+      method: 'POST',
+      body:   JSON.stringify({
+        action:               'gestionarSolicitud',
+        id_solicitud:         idSolicitud,
+        decision:             decision,
+        comentario:           comentario,
+        id_asesor_aprobador:  SESSION.id_asesor,
+        nombre_aprobador:     SESSION.nombre,
+        etiqueta_aprobador:   SESSION.nivel.etiqueta
+      }),
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    const data = await res.json();
+    if (data.ok) {
+      const sol = SOLICITUDES.find(s => s.id_solicitud === idSolicitud);
+      if (sol) { sol.estado = decision; sol.comentario = comentario; sol.nombre_aprobador = SESSION.nombre + ' · ' + SESSION.nivel.etiqueta; }
+      renderPanel();
+      setTimeout(() => toggleDetalle(idSolicitud), 100);
+    } else { acc.innerHTML = `<div class="error-card"><p>⚠️ ${data.error}</p></div>`; }
+  } catch(e) { acc.innerHTML = `<div class="error-card"><p>⚠️ Error: ${e.message}</p></div>`; }
+}
+
+function mostrarError(msg) {
+  document.getElementById('main-body').innerHTML = `
+    <div class="error-card" style="margin-top:30px">
+      <p style="font-size:24px;margin-bottom:10px">⚠️</p>
+      <p style="font-weight:700;margin-bottom:8px">No se pudo cargar</p>
+      <p>${msg}</p>
+      <button onclick="mostrarLogin()" style="margin-top:16px;padding:10px 20px;background:#CC0000;color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:700">Intentar de nuevo</button>
+    </div>`;
+}
+
+init();
+</script>
+</body>
+</html>
